@@ -1,0 +1,28 @@
+name: Build iOS Dylib
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Theos
+      run: |
+        bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+        echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+    - name: Download SDKs
+      run: |
+        git clone --depth 1 https://github.com/theos/sdks.git $HOME/theos/sdks
+
+    - name: Build Library
+      run: |
+        export THEOS=$HOME/theos
+        make
+
+    - name: Upload dylib
+      uses: actions/upload-artifact@v4
+      with:
+        name: AimAssist-dylib
+        path: .theos/obj/AimAssist.dylib
